@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 // Error Handling middleware
 app.use((err, req, res, next) => {
   let errCode, errMessage
-
+  console.log("Error handling middleware")
   if (err.errors) {
     // mongoose validation error
     errCode = 400 // bad request
@@ -44,8 +44,11 @@ const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
 
-app.post('api/exercise/new-user', (req, res)=>{
-  console.log('successful post');
+app.post("/api/exercise/new-user", (req, res)=>{
+  console.log("successful post");
+  res.json({error: "invalid URL"});
+
+  //return;
 })
 
 // Not found middleware
