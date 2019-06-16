@@ -19,10 +19,7 @@ app.get('/', (req, res) => {
 });
 
 
-// Not found middleware
-app.use((req, res, next) => {
-  return next({status: 404, message: 'not found'})
-})
+
 
 // Error Handling middleware
 app.use((err, req, res, next) => {
@@ -49,4 +46,9 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 
 app.post('api/exercise/new-user', (req, res)=>{
   console.log('successful post');
+})
+
+// Not found middleware
+app.use((req, res, next) => {
+  return next({status: 404, message: 'not found'})
 })
