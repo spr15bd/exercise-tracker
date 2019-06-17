@@ -5,8 +5,13 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const mongoose = require('mongoose')
-mongoose.connect(process.env.MLAB_URI)
-
+mongoose.connect(process.env.MLAB_URI, { useNewUrlParser: true })
+var schema = mongoose.Schema;
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'))
+db.once('open', function() {
+  console.log("Connected to MongoDB");
+});
 app.use(cors())
 
 app.use(bodyParser.urlencoded({extended: false}))
