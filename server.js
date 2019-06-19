@@ -16,9 +16,11 @@ db.once('open', function() {
 var userSchema = new Schema({
   userName: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   }
 });
+var users = mongoose.model('users', userSchema); 
 app.use(cors());
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -52,9 +54,7 @@ app.use((err, req, res, next) => {
     .send(errMessage)
 })
 
-const listener = app.listen(process.env.PORT || 3000, () => {
-  console.log('Your app is listening on port ' + listener.address().port)
-})
+
 
 app.post("/api/exercise/new-user", (req, res)=>{
   console.log("successful post");
@@ -69,6 +69,18 @@ app.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
 });
 
-var createAndSaveNewUser = new function(username, res, req) {
-  
+var createAndSaveNewUser = function(username, res, req) {
+  console.log("adding new user, "+username);
+  var user = new users({userName: username});
+  user.save(function(err, data){
+    if(err) {
+      console.log("There is an error: "+err);
+    } else {
+      console.log("new user created in db: "+user);
+    }
+  });
 }
+
+const listener = app.listen(process.env.PORT || 3000, () => {
+  console.log('Your app is listening on port ' + listener.address().port);
+})
