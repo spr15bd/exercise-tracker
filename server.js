@@ -74,9 +74,14 @@ var createAndSaveNewUser = function(username, res, req) {
   var user = new users({userName: username});
   user.save(function(err, data){
     if(err) {
-      console.log("There is an error: "+err);
+      console.log("There was an error: "+err);
     } else {
-      console.log("new user created in db: "+user);
+      console.log("new user created in db: "+data);
+      res.json({
+        "username": username,
+        "_id": data._id
+               
+      });
     }
   });
 }
