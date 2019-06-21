@@ -64,6 +64,14 @@ app.post("/api/exercise/new-user", (req, res)=>{
   //return;
 })
 
+app.get("/api/exercise/users", (req, res)=>{
+  console.log("get all users");
+  getUsers(req, res);
+  
+
+  //return;
+})
+
 // Not found middleware
 app.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
@@ -84,6 +92,17 @@ var createAndSaveNewUser = function(username, res, req) {
       });
     }
   });
+}
+
+var getUsers = function(req, res) {
+  users.find({}, function(error, data) {
+    if (error) {
+      
+    } else {
+      res.json(data);
+    }
+  });
+  //res.json(users.find());
 }
 
 const listener = app.listen(process.env.PORT || 3000, () => {
