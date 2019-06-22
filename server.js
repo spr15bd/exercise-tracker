@@ -64,6 +64,14 @@ app.post("/api/exercise/new-user", (req, res)=>{
   //return;
 })
 
+app.post("/api/exercise/add", (req, res)=>{
+  console.log("successful post");
+  updateUser(req.body.username, res, req);
+  
+
+  
+})
+
 app.get("/api/exercise/users", (req, res)=>{
   console.log("get all users");
   getUsers(req, res);
