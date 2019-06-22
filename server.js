@@ -95,9 +95,9 @@ var createAndSaveNewUser = function(username, res, req) {
 }
 
 var getUsers = function(req, res) {
-  users.find({}, function(error, data) {
+  users.find({}, {userName:1}, function(error, data) {
     if (error) {
-      
+      res.json("Error");
     } else {
       res.json(data);
     }
