@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const mongoose = require('mongoose');
+mongoose.set('useCreateIndex', true);
 mongoose.connect(process.env.MLAB_URI, { useNewUrlParser: true });
 var Schema = mongoose.Schema;
 var db = mongoose.connection;
@@ -111,6 +112,11 @@ var getUsers = function(req, res) {
     }
   });
   //res.json(users.find());
+}
+
+var updateUser = function(res, req) {
+  console.log("adding new exercise");
+  // users.findByIdAndUpdate
 }
 
 const listener = app.listen(process.env.PORT || 3000, () => {
