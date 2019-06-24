@@ -59,7 +59,7 @@ app.use((err, req, res, next) => {
 
 app.post("/api/exercise/new-user", (req, res)=>{
   console.log("successful post");
-  createAndSaveNewUser(req.body.username, res, req);
+  createAndSaveNewUser(res, req);
   
 
   //return;
@@ -67,7 +67,7 @@ app.post("/api/exercise/new-user", (req, res)=>{
 
 app.post("/api/exercise/add", (req, res)=>{
   console.log("successful post");
-  updateUser(req.body.username, res, req);
+  updateUser(res, req);
   
 
   
@@ -86,16 +86,16 @@ app.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
 });
 
-var createAndSaveNewUser = function(username, res, req) {
-  console.log("adding new user, "+username);
-  var user = new users({userName: username});
+var createAndSaveNewUser = function(res, req) {
+  console.log("adding new user, "+req.body.username);
+  var user = new users({userName: req.body.username});
   user.save(function(err, data){
     if(err) {
       console.log("There was an error: "+err);
     } else {
       console.log("new user created in db: "+data);
       res.json({
-        "username": username,
+        "username": req.body.username,
         "_id": data._id
                
       });
@@ -115,8 +115,21 @@ var getUsers = function(req, res) {
 }
 
 var updateUser = function(res, req) {
-  console.log("adding new exercise");
-  // users.findByIdAndUpdate
+  console.log("attempting to add new exercise");
+  if (!req.body.userId&&!req.body.description&&!req.body.duration) {
+    res.json("Please enter a valid user id, description and duration");
+  }
+  
+  users.findByIdAndUpdate(req.body.userId, 
+    {description: req.body.description}, 
+    {duration: req.body.duration}, 
+    {date: req.body.date?req.body.date : new Date()},
+    function(err, data) {
+      if (err) {
+        res.json("Error");
+      }
+    }
+  );
 }
 
 const listener = app.listen(process.env.PORT || 3000, () => {
