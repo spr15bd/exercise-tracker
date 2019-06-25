@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const mongoose = require('mongoose');
-const ObjectID = require('mongodb').ObjectID;
+const ObjectId = require('mongodb').ObjectId;
 mongoose.set('useCreateIndex', true);
 
 mongoose.connect(process.env.MLAB_URI, { useNewUrlParser: true });
@@ -122,13 +122,13 @@ var updateUser = function(res, req) {
     res.json("Please enter a valid user id, description and duration");
   }
   
-  var id = ObjectID(req.body.userId);
+  var id = new ObjectId(req.body.userId);
   console.log("new id is: "+id);
-  users.findByIdAndUpdate(req.body.userId, 
+  users.findByIdAndUpdate({_id:ObjectId(req.body.userId)}, 
     /*{description: req.body.description}, 
     {duration: req.body.duration}, 
     {date: req.body.date?req.body.date : new Date()},*/
-    {exercise: req.body.description},                   
+    {userName: req.body.description},                   
     function(err, data) {
       if (err) {
         res.json("Error during update"+err);
