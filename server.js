@@ -128,15 +128,17 @@ var updateUser = function(res, req) {
   
   var id = new ObjectId(req.body.userId);
   console.log("new id is: "+id);
-  users.update({_id:ObjectId(req.body.userId)}, 
+  users.findByIdAndUpdate({_id:ObjectId(req.body.userId)}, 
     /*{description: req.body.description}, 
     {duration: req.body.duration}, 
     {date: req.body.date?req.body.date : new Date()},*/
-    {$set:{"log": req.body.description}},
+    {"log": [req.body.description,req.body.duration, req.body.date]},
     {upsert:false, multi:true},
     function(err, data) {
       if (err) {
         res.json("Error during update"+err);
+      } else {
+        res.json(data);
       }
     }
   );
