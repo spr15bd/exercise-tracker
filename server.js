@@ -21,6 +21,10 @@ var userSchema = new Schema({
     type: String,
     required: true,
     unique: true
+  },
+  log: {
+    type: Array,
+    required: true
   }
 });
 var users = mongoose.model('users', userSchema); 
@@ -90,7 +94,7 @@ app.use((req, res, next) => {
 
 var createAndSaveNewUser = function(res, req) {
   console.log("adding new user, "+req.body.username);
-  var user = new users({userName: req.body.username});
+  var user = new users({userName: req.body.username, log:[]});
   user.save(function(err, data){
     if(err) {
       console.log("There was an error: "+err);
@@ -124,11 +128,12 @@ var updateUser = function(res, req) {
   
   var id = new ObjectId(req.body.userId);
   console.log("new id is: "+id);
-  users.findByIdAndUpdate({_id:ObjectId(req.body.userId)}, 
+  users.update({_id:ObjectId(req.body.userId)}, 
     /*{description: req.body.description}, 
     {duration: req.body.duration}, 
     {date: req.body.date?req.body.date : new Date()},*/
-    {userName: req.body.description},                   
+    {$set:{"log": req.body.description}},
+    {upsert:false, multi:true},
     function(err, data) {
       if (err) {
         res.json("Error during update"+err);
