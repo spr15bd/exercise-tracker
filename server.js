@@ -22,10 +22,21 @@ var userSchema = new Schema({
     required: true,
     unique: true
   },
-  log: {
-    type: Array,
-    required: true
-  }
+  exerciseLog: [{
+    description: {
+      type: String,
+      required: true
+    },
+    duration: {
+      type: Number,
+      required: true
+    },
+    date: {
+      type: Date,
+      default: Date.now()
+    }
+    
+  }]
 });
 var users = mongoose.model('users', userSchema); 
 app.use(cors());
@@ -132,7 +143,7 @@ var updateUser = function(res, req) {
     /*{description: req.body.description}, 
     {duration: req.body.duration}, 
     {date: req.body.date?req.body.date : new Date()},*/
-    {"log": [req.body.description,req.body.duration, req.body.date]},
+    {"exerciseLog": [{description: req.body.description, duration: req.body.duration, date: req.body.date}]},
     {upsert:false, multi:true},
     function(err, data) {
       if (err) {
