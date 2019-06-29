@@ -137,21 +137,15 @@ var updateUser = function(res, req) {
     res.json("Please enter a valid user id, description and duration");
   }
   
-  var id = new ObjectId(req.body.userId);
-  console.log("new id is: "+id);
+  //var id = new ObjectId(req.body.userId);
+  //console.log("new id is: "+id);
   
-  users.findById(
+  let log =users.findById(
     {_id:ObjectId(req.body.userId)}, 
-    {"execiseLog":{}},
-    function(err, data) {
-      if (err) {
-        res.json("Error during update"+err);
-      } else {
-        res.json(data);
-      }
-    }
+    {"exerciseLog":1}
+    
   );
-  
+  console.log("Exercise log is: "+log);
   
   users.findByIdAndUpdate({_id:ObjectId(req.body.userId)}, 
     /*{description: req.body.description}, 
