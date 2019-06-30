@@ -98,6 +98,14 @@ app.get("/api/exercise/users", (req, res)=>{
   //return;
 })
 
+app.get("/api/exercise/log/:userId", (req, res)=>{
+  console.log("get user exercise log for userid "+req.params.userId);
+  getUserExerciseLog(req, res);
+  
+
+  //return;
+})
+
 // Not found middleware
 app.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
@@ -131,6 +139,17 @@ var getUsers = function(req, res) {
   //res.json(users.find());
 }
 
+var getUserExerciseLog = function(req, res) {
+  users.find({}, {_id:ObjectId(req.params.userId)}, function(error, data) {
+    if (error) {
+      res.json("Error");
+    } else {
+      res.json(data.exerciseLog);
+    }
+  });
+  //res.json(users.find());
+}
+
 var updateUser = function(res, req) {
   console.log("attempting to add new exercise");
   if (!req.body.userId&&!req.body.description&&!req.body.duration) {
@@ -140,8 +159,7 @@ var updateUser = function(res, req) {
   //var id = new ObjectId(req.body.userId);
   //console.log("new id is: "+id);
   
-  let log =[];
-  log=users.findById(
+  let log=users.findById(
     {_id:ObjectId(req.body.userId)}, 
     {"exerciseLog":1}
     
