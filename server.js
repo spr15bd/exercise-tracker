@@ -140,7 +140,8 @@ var updateUser = function(res, req) {
   //var id = new ObjectId(req.body.userId);
   //console.log("new id is: "+id);
   
-  let log =users.findById(
+  let log =[];
+  log=users.findById(
     {_id:ObjectId(req.body.userId)}, 
     {"exerciseLog":1}
     
@@ -151,7 +152,7 @@ var updateUser = function(res, req) {
     /*{description: req.body.description}, 
     {duration: req.body.duration}, 
     {date: req.body.date?req.body.date : new Date()},*/
-    {"exerciseLog": [{description: req.body.description, duration: req.body.duration, date: req.body.date}]},
+    {$push:{"exerciseLog": {description: req.body.description, duration: req.body.duration, date: req.body.date}}},
     {upsert:false, multi:true},
     function(err, data) {
       if (err) {
