@@ -163,10 +163,11 @@ var updateUser = function(res, req) {
   
   let log=users.findById(
     {_id:ObjectId(req.body.userId)}, 
-    {"exerciseLog":1}
+    {"exerciseLog":1, "username":1}
     
   );
   console.log("Exercise log is: "+log);
+  
   
   users.findByIdAndUpdate({_id:ObjectId(req.body.userId)}, 
     /*{description: req.body.description}, 
@@ -178,7 +179,7 @@ var updateUser = function(res, req) {
       if (err) {
         res.json("Error during update"+err);
       } else {
-        res.json(data);
+        res.json(log + data.exerciseLog[data.exerciseLog.length-1]);
       }
     }
   );
