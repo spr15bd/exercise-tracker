@@ -161,12 +161,7 @@ var updateUser = function(res, req) {
   //var id = new ObjectId(req.body.userId);
   //console.log("new id is: "+id);
   
-  let log=users.findById(
-    {_id:ObjectId(req.body.userId)}, 
-    {"exerciseLog":1, "username":1}
-    
-  );
-  console.log("Exercise log is: "+log);
+  
   
   
   users.findByIdAndUpdate({_id:ObjectId(req.body.userId)}, 
@@ -179,10 +174,22 @@ var updateUser = function(res, req) {
       if (err) {
         res.json("Error during update"+err);
       } else {
-        res.json(log + data.exerciseLog[data.exerciseLog.length-1]);
+        displaySuccess(req, res, data.exerciseLog[data.exerciseLog.length-1]);
+        //res.json(user + data.exerciseLog[data.exerciseLog.length-1]);
       }
     }
   );
+}
+
+var displaySuccess= function(req, res, log) {
+  let user = users.findById({_id:ObjectId(req.body.userId)}, {userName:1}, function(error, data) {
+      if (error) {
+        res.json("Error");
+      } else {
+        res.json(data + log);
+      }
+  });
+  console.log("Exercise log is: "+user);
 }
 
 const listener = app.listen(process.env.PORT || 3000, () => {
