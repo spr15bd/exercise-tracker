@@ -99,8 +99,8 @@ app.get("/api/exercise/users", (req, res)=>{
   //return;
 })
 
-app.get("/api/exercise/log/:userId", (req, res)=>{
-  
+app.get("/api/exercise/log", (req, res)=>{
+  console.log("Query is "+req.query.userId);
   getUserExerciseLog(req, res);
   
 
@@ -142,7 +142,7 @@ var getUsers = function(req, res) {
 
 var getUserExerciseLog = function(req, res) {
   // return user object plus exercise log, suppress the userId
-  users.findById({_id:ObjectId(req.params.userId)}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
+  users.findById({_id:ObjectId(req.query.userId)}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
     if (error) {
       res.json("Error");
     } else {
