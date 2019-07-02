@@ -1,3 +1,4 @@
+// NodeJS, mongoDB Exercise Tracker
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -99,7 +100,7 @@ app.get("/api/exercise/users", (req, res)=>{
 })
 
 app.get("/api/exercise/log/:userId", (req, res)=>{
-  console.log("get user exercise log for userid "+req.params.userId);
+  
   getUserExerciseLog(req, res);
   
 
@@ -140,11 +141,12 @@ var getUsers = function(req, res) {
 }
 
 var getUserExerciseLog = function(req, res) {
-  users.find({}, {_id:ObjectId(req.params.userId)}, function(error, data) {
+  // return user object plus exercise log, suppress the userId
+  users.findById({_id:ObjectId(req.params.userId)}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
     if (error) {
       res.json("Error");
     } else {
-      res.json(data.exerciseLog);
+      res.json(data);
     }
   });
   //res.json(users.find());
