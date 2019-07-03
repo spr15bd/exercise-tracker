@@ -146,6 +146,12 @@ var getUserExerciseLog = function(req, res) {
     if (error) {
       res.json("Error");
     } else {
+      if (req.query.limit) {
+        data.exerciseLog = data.exerciseLog.slice(0, req.query.limit);
+      }
+      if (req.query.from&req.query.to) {
+        
+      }
       res.json(data);
     }
   });
