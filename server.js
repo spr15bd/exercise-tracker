@@ -149,8 +149,16 @@ var getUserExerciseLog = function(req, res) {
       if (req.query.limit) {
         data.exerciseLog = data.exerciseLog.slice(0, req.query.limit);
       }
-      if (req.query.from&req.query.to) {
-        
+      if (req.query.from||req.query.to) {
+        let fromDate=req.query.from;
+        let toDate=req.query.to;
+        if (fromDate&&toDate) {
+          data.exerciseLog=data.exerciseLog.filter(item => item.date > new Date(req.query.from) && item.date < new Date(req.query.to));
+        } else if (fromDate&&!toDate) {
+          data.exerciseLog=data.exerciseLog.filter(item => item.date > new Date(req.query.from));
+        } else if (!fromDate&&toDate) {
+          data.exerciseLog=data.exerciseLog.filter(item => item.date < new Date(req.query.to));
+        }
       }
       res.json(data);
     }
@@ -192,7 +200,8 @@ var displaySuccess= function(req, res, log) {
       if (error) {
         res.json("Error");
       } else {
-        res.json(data + log);
+        const resultObject =  { data, log };
+        res.json(resultObject);
       }
   });
   console.log("Exercise log is: "+user);
