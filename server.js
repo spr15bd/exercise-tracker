@@ -140,6 +140,8 @@ var getUsers = function(req, res) {
   //res.json(users.find());
 }
 
+
+
 var getUserExerciseLog = function(req, res) {
   // return user object plus exercise log, suppress the userId
   users.findById({_id:ObjectId(req.query.userId)}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
@@ -160,6 +162,7 @@ var getUserExerciseLog = function(req, res) {
           data.exerciseLog=data.exerciseLog.filter(item => item.date < new Date(req.query.to));
         }
       }
+      console.log("count is "+data.exerciseLog.length);
       res.json(data);
     }
   });
