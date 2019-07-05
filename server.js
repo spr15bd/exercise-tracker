@@ -163,6 +163,7 @@ var getUserExerciseLog = function(req, res) {
         }
       }
       console.log("count is "+data.exerciseLog.length);
+      data.count = data.exerciseLog.length;
       res.json(data);
     }
   });
