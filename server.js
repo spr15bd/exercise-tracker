@@ -163,8 +163,10 @@ var getUserExerciseLog = function(req, res) {
         }
       }
       console.log("count is "+data.exerciseLog.length);
-      data.count = data.exerciseLog.length;
-      res.json(data);
+      let totalExercises = data.exerciseLog.length;
+      let logResult = data.toObject();
+      logResult.exercise_count = totalExercises;
+      res.json(logResult);
     }
   });
   //res.json(users.find());
