@@ -2,14 +2,20 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-
 const cors = require('cors');
-
 const mongoose = require('mongoose');
 const ObjectId = require('mongodb').ObjectId;
+// collection.ensureIndex is deprecated. Therefore used createIndexes instead.
 mongoose.set('useCreateIndex', true);
-
-mongoose.connect(process.env.MLAB_URI, { useNewUrlParser: true });
+mongoose.connect(process.env.MLAB_URI, (databaseconnecterror, data) => { 
+  //useNewUrlParser: true });
+  if (databaseconnecterror) {
+    console.log("Error conecting to mongodb database");
+    throw(databaseconnecterror);
+  } else {
+    console.log("Successfully connected to the mongodb database");
+  }
+});
 var Schema = mongoose.Schema;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -36,78 +42,41 @@ var userSchema = new Schema({
       type: Date,
       default: Date.now()
     }
-    
   }]
 });
 var users = mongoose.model('users', userSchema); 
 app.use(cors());
-
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-
-
 app.use(express.static('public'));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-
-
-
-// Error Handling middleware
-app.use((err, req, res, next) => {
-  let errCode, errMessage
-  console.log("Error handling middleware")
-  if (err.errors) {
-    // mongoose validation error
-    errCode = 400 // bad request
-    const keys = Object.keys(err.errors)
-    // report the first validation error
-    errMessage = err.errors[keys[0]].message
-  } else {
-    // generic or custom error
-    errCode = err.status || 500
-    errMessage = err.message || 'Internal Server Error'
-  }
-  res.status(errCode).type('txt')
-    .send(errMessage)
-})
-
-
-
+// Register a new user
 app.post("/api/exercise/new-user", (req, res)=>{
-  console.log("successful post");
   createAndSaveNewUser(res, req);
-  
-
-  //return;
 })
 
+// Add a new exercise to existing user
 app.post("/api/exercise/add", (req, res)=>{
-  console.log("successful post");
   updateUser(res, req);
-  
-
-  
 })
 
+// Return all user details
 app.get("/api/exercise/users", (req, res)=>{
   console.log("get all users");
   getUsers(req, res);
-  
-
-  //return;
 })
 
+// retrieve the log array which shows all exercises added for a user
 app.get("/api/exercise/log", (req, res)=>{
-  console.log("Query is "+req.query.userId);
-  getUserExerciseLog(req, res);
+  getUserExerciseLog(req, res).then(res.json(this));
   
-
-  //return;
 })
 
-// Not found middleware
+
+// Not found middleware - fire 'Not found middleware' only if the other routes are unsuccessful
 app.use((req, res, next) => {
   return next({status: 404, message: 'not found'})
 });
@@ -117,7 +86,9 @@ var createAndSaveNewUser = function(res, req) {
   var user = new users({userName: req.body.username, log:[]});
   user.save(function(err, data){
     if(err) {
-      console.log("There was an error: "+err);
+      
+      res.send("Error updating database: "+err.errmsg)
+      
     } else {
       console.log("new user created in db: "+data);
       res.json({
@@ -137,12 +108,9 @@ var getUsers = function(req, res) {
       res.json(data);
     }
   });
-  //res.json(users.find());
 }
 
-
-
-var getUserExerciseLog = function(req, res) {
+var getUserExerciseLog = async function(req, res) {
   // return user object plus exercise log, suppress the userId
   users.findById({_id:ObjectId(req.query.userId)}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
     if (error) {
@@ -162,14 +130,18 @@ var getUserExerciseLog = function(req, res) {
           data.exerciseLog=data.exerciseLog.filter(item => item.date < new Date(req.query.to));
         }
       }
-      console.log("count is "+data.exerciseLog.length);
       let totalExercises = data.exerciseLog.length;
+      
+      // the data variable is not an object, so convert it to one in order to add a count property of the number of exercises in the log
       let logResult = data.toObject();
       logResult.exercise_count = totalExercises;
-      res.json(logResult);
+      logResult.exerciseLog.forEach ((item) => {
+        item.date = item.date.toString();
+      })
+      return logResult;
+      
     }
-  });
-  //res.json(users.find());
+  })
 }
 
 var updateUser = function(res, req) {
@@ -178,39 +150,31 @@ var updateUser = function(res, req) {
     res.json("Please enter a valid user id, description and duration");
   }
   
-  //var id = new ObjectId(req.body.userId);
-  //console.log("new id is: "+id);
-  
-  
-  
-  
   users.findByIdAndUpdate({_id:ObjectId(req.body.userId)}, 
-    /*{description: req.body.description}, 
-    {duration: req.body.duration}, 
-    {date: req.body.date?req.body.date : new Date()},*/
     {$push:{"exerciseLog": {description: req.body.description, duration: req.body.duration, date: req.body.date}}},
     {upsert:false, multi:true},
     function(err, data) {
       if (err) {
         res.json("Error during update"+err);
       } else {
-        displaySuccess(req, res, data.exerciseLog[data.exerciseLog.length-1]);
-        //res.json(user + data.exerciseLog[data.exerciseLog.length-1]);
+        getUserAndExercise(req, res, data.exerciseLog[data.exerciseLog.length-1]);
       }
     }
   );
 }
 
-var displaySuccess= function(req, res, log) {
+var getUserAndExercise = function(req, res, mostRecentLog) {
+  
   let user = users.findById({_id:ObjectId(req.body.userId)}, {userName:1}, function(error, data) {
       if (error) {
-        res.json("Error");
+        return error;
       } else {
-        const resultObject =  { data, log };
-        res.json(resultObject);
-      }
+        let userAndExercise =  { data, mostRecentLog };
+        res.json(userAndExercise);
+      } 
+      
   });
-  console.log("Exercise log is: "+user);
+  
 }
 
 const listener = app.listen(process.env.PORT || 3000, () => {
