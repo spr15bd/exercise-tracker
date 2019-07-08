@@ -71,7 +71,7 @@ app.get("/api/exercise/users", (req, res)=>{
 
 // retrieve the log array which shows all exercises added for a user
 app.get("/api/exercise/log", (req, res)=>{
-  getUserExerciseLog(req, res).then(res.json(this));
+  getUserExerciseLog(req, res);
   
 })
 
@@ -110,7 +110,7 @@ var getUsers = function(req, res) {
   });
 }
 
-var getUserExerciseLog = async function(req, res) {
+var getUserExerciseLog = function(req, res) {
   // return user object plus exercise log, suppress the userId
   users.findById({_id:ObjectId(req.query.userId)}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
     if (error) {
@@ -138,7 +138,7 @@ var getUserExerciseLog = async function(req, res) {
       logResult.exerciseLog.forEach ((item) => {
         item.date = item.date.toString();
       })
-      return logResult;
+      res.json(logResult);
       
     }
   })
@@ -157,7 +157,7 @@ var updateUser = function(res, req) {
       if (err) {
         res.json("Error during update"+err);
       } else {
-        getUserAndExercise(req, res, data.exerciseLog[data.exerciseLog.length-1]);
+        getUserAndExercise(req, res, {description: req.body.description, duration: req.body.duration, date: req.body.date});
       }
     }
   );
@@ -165,11 +165,11 @@ var updateUser = function(res, req) {
 
 var getUserAndExercise = function(req, res, mostRecentLog) {
   
-  let user = users.findById({_id:ObjectId(req.body.userId)}, {userName:1}, function(error, data) {
+  let user = users.findById({_id:ObjectId(req.body.userId)}, {userName:1}, function(error, user) {
       if (error) {
         return error;
       } else {
-        let userAndExercise =  { data, mostRecentLog };
+        let userAndExercise =  { user, mostRecentLog };
         res.json(userAndExercise);
       } 
       
