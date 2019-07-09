@@ -7,8 +7,8 @@ const mongoose = require('mongoose');
 const ObjectId = require('mongodb').ObjectId;
 // collection.ensureIndex is deprecated. Therefore used createIndexes instead.
 mongoose.set('useCreateIndex', true);
-mongoose.connect(process.env.MLAB_URI, (databaseconnecterror, data) => { 
-  //useNewUrlParser: true });
+mongoose.connect(process.env.MLAB_URI, { useNewUrlParser: true }, (databaseconnecterror, data) => { 
+  // current URL string parser is deprecated, and will be removed in a future version. Therefore set { useNewUrlParser: true } in MongoClient.connect.
   if (databaseconnecterror) {
     console.log("Error conecting to mongodb database");
     throw(databaseconnecterror);
@@ -86,15 +86,12 @@ var createAndSaveNewUser = function(res, req) {
   var user = new users({userName: req.body.username, log:[]});
   user.save(function(err, data){
     if(err) {
-      
       res.send("Error updating database: "+err.errmsg)
-      
     } else {
       console.log("new user created in db: "+data);
       res.json({
         "username": req.body.username,
         "_id": data._id
-               
       });
     }
   });
@@ -139,7 +136,6 @@ var getUserExerciseLog = function(req, res) {
         item.date = item.date.toString();
       })
       res.json(logResult);
-      
     }
   })
 }
@@ -172,9 +168,7 @@ var getUserAndExercise = function(req, res, mostRecentLog) {
         let userAndExercise =  { user, mostRecentLog };
         res.json(userAndExercise);
       } 
-      
   });
-  
 }
 
 const listener = app.listen(process.env.PORT || 3000, () => {
