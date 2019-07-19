@@ -1,4 +1,3 @@
-// NodeJS, mongoDB Exercise Tracker
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -142,18 +141,18 @@ var getUserExerciseLog = function(req, res) {
 
 var updateUser = function(res, req) {
   console.log("attempting to add new exercise");
-  if (!req.body.userId&&!req.body.description&&!req.body.duration) {
+  if (!req.body.userId||!req.body.description||!req.body.duration) {
     res.json("Please enter a valid user id, description and duration");
   }
-  
-  users.findByIdAndUpdate({_id:ObjectId(req.body.userId)}, 
-    {$push:{"exerciseLog": {description: req.body.description, duration: req.body.duration, date: req.body.date}}},
+  let now = Date();
+  users.findByIdAndUpdate({_id:req.body.userId}, 
+    {$push:{"exerciseLog": {description: req.body.description, duration: req.body.duration, date: req.body.date||now}}},
     {upsert:false, multi:true},
     function(err, data) {
       if (err) {
-        res.json("Error during update"+err);
+        res.send("Invalid userId. Please enter a valid userId.");
       } else {
-        getUserAndExercise(req, res, {description: req.body.description, duration: req.body.duration, date: req.body.date});
+        getUserAndExercise(req, res, {description: req.body.description, duration: req.body.duration, date: now.toString()});
       }
     }
   );
@@ -161,9 +160,11 @@ var updateUser = function(res, req) {
 
 var getUserAndExercise = function(req, res, mostRecentLog) {
   
-  let user = users.findById({_id:ObjectId(req.body.userId)}, {userName:1}, function(error, user) {
+  let user = users.findById({_id:req.body.userId}, {userName:1}, function(error, user) {
       if (error) {
-        return error;
+        console.log(error);
+            
+        
       } else {
         let userAndExercise =  { user, mostRecentLog };
         res.json(userAndExercise);
