@@ -1,3 +1,4 @@
+// NodeJS, mongoDB Exercise Tracker
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -145,9 +146,11 @@ var updateUser = function(res, req) {
     res.json("Please enter a valid user id, description and duration");
   }
   let now = Date();
+  // 'upsert:false' - if id not found do not add the exercise details to the log
+  // 'multi:false'  - if multiple matching ids found, update one only
   users.findByIdAndUpdate({_id:req.body.userId}, 
     {$push:{"exerciseLog": {description: req.body.description, duration: req.body.duration, date: req.body.date||now}}},
-    {upsert:false, multi:true},
+    {upsert:false, multi:false},
     function(err, data) {
       if (err) {
         res.send("Invalid userId. Please enter a valid userId.");
