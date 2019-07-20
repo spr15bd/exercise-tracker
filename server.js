@@ -4,14 +4,16 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const ObjectId = require('mongodb').ObjectId;
+//const ObjectId = require('mongodb').ObjectId;
 // collection.ensureIndex is deprecated. Therefore used createIndexes instead.
 mongoose.set('useCreateIndex', true);
-mongoose.connect(process.env.MLAB_URI, { useNewUrlParser: true }, (databaseconnecterror, data) => { 
+
+// Connect to the database
+mongoose.connect(process.env.MLAB_URI, { useNewUrlParser: true }, (databaseConnectError, data) => { 
   // current URL string parser is deprecated, and will be removed in a future version. Therefore set { useNewUrlParser: true } in MongoClient.connect.
-  if (databaseconnecterror) {
+  if (databaseConnectError) {
     console.log("Error conecting to mongodb database");
-    throw(databaseconnecterror);
+    throw(databaseConnectError);
   } else {
     console.log("Successfully connected to the mongodb database");
   }
@@ -23,6 +25,7 @@ db.once('open', function() {
   console.log("Connected to MongoDB");
 });
 
+// Define a schema (the data fields that will be held in the database)
 var userSchema = new Schema({
   userName: {
     type: String,
@@ -45,10 +48,13 @@ var userSchema = new Schema({
   }]
 });
 var users = mongoose.model('users', userSchema); 
+
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static('public'));
+
+// Display imitial page (html form)
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
@@ -74,7 +80,6 @@ app.get("/api/exercise/log", (req, res)=>{
   getUserExerciseLog(req, res);
   
 })
-
 
 // Not found middleware - fire 'Not found middleware' only if the other routes are unsuccessful
 app.use((req, res, next) => {
@@ -109,9 +114,9 @@ var getUsers = function(req, res) {
 
 var getUserExerciseLog = function(req, res) {
   // return user object plus exercise log, suppress the userId
-  users.findById({_id:ObjectId(req.query.userId)}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
+  users.findById({_id:req.query.userId}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
     if (error) {
-      res.json("Error");
+      res.send("Invalid userId. Please enter a valid userId.");
     } else {
       if (req.query.limit) {
         data.exerciseLog = data.exerciseLog.slice(0, req.query.limit);
@@ -128,7 +133,6 @@ var getUserExerciseLog = function(req, res) {
         }
       }
       let totalExercises = data.exerciseLog.length;
-      
       // the data variable is not an object, so convert it to one in order to add a count property of the number of exercises in the log
       let logResult = data.toObject();
       logResult.exercise_count = totalExercises;
@@ -162,12 +166,9 @@ var updateUser = function(res, req) {
 }
 
 var getUserAndExercise = function(req, res, mostRecentLog) {
-  
   let user = users.findById({_id:req.body.userId}, {userName:1}, function(error, user) {
       if (error) {
         console.log(error);
-            
-        
       } else {
         let userAndExercise =  { user, mostRecentLog };
         res.json(userAndExercise);
