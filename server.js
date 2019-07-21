@@ -85,9 +85,9 @@ app.use((req, res, next) => {
 
 var createAndSaveNewUser = function(res, req) {
   var user = new users({userName: req.body.username, log:[]});
-  user.save(function(err, data){
-    if(err) {
-      res.send("Error updating database: "+err.errmsg)
+  user.save(function(error, data){
+    if(error) {
+      res.send("Error updating database: "+error.errmsg)
     } else {
       res.json({
         "username": req.body.username,
