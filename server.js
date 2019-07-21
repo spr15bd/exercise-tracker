@@ -4,7 +4,6 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
-//const ObjectId = require('mongodb').ObjectId;
 // collection.ensureIndex is deprecated. Therefore used createIndexes instead.
 mongoose.set('useCreateIndex', true);
 
@@ -71,14 +70,12 @@ app.post("/api/exercise/add", (req, res)=>{
 
 // Return all user details
 app.get("/api/exercise/users", (req, res)=>{
-  console.log("get all users");
   getUsers(req, res);
 })
 
 // retrieve the log array which shows all exercises added for a user
 app.get("/api/exercise/log", (req, res)=>{
-  getUserExerciseLog(req, res);
-  
+  getUserExerciseLog(req, res); 
 })
 
 // Not found middleware - fire 'Not found middleware' only if the other routes are unsuccessful
@@ -87,13 +84,11 @@ app.use((req, res, next) => {
 });
 
 var createAndSaveNewUser = function(res, req) {
-  console.log("adding new user, "+req.body.username);
   var user = new users({userName: req.body.username, log:[]});
   user.save(function(err, data){
     if(err) {
       res.send("Error updating database: "+err.errmsg)
     } else {
-      console.log("new user created in db: "+data);
       res.json({
         "username": req.body.username,
         "_id": data._id
@@ -102,10 +97,11 @@ var createAndSaveNewUser = function(res, req) {
   });
 }
 
-var getUsers = function(req, res) {
-  users.find({}, {userName:1}, function(error, data) {
+// Return an object of all current users
+var getUsers = (req, res) => {
+  users.find({}, {userName:1}, (error, data) => {
     if (error) {
-      res.json("Error");
+      res.json(error);
     } else {
       res.json(data);
     }
@@ -113,14 +109,16 @@ var getUsers = function(req, res) {
 }
 
 var getUserExerciseLog = function(req, res) {
-  // return user object plus exercise log, suppress the userId
+  // return user object plus exercise log, omit the userId
   users.findById({_id:req.query.userId}, {_id: 0, userName:1,exerciseLog:1}, function(error, data) {
     if (error) {
       res.send("Invalid userId. Please enter a valid userId.");
     } else {
+      // If the user specifies a limit return only up to that index of the exercise log array
       if (req.query.limit) {
         data.exerciseLog = data.exerciseLog.slice(0, req.query.limit);
       }
+      // if the user specifies a from date and/or a to date, filter out exercise log items outside these dates
       if (req.query.from||req.query.to) {
         let fromDate=req.query.from;
         let toDate=req.query.to;
@@ -145,13 +143,15 @@ var getUserExerciseLog = function(req, res) {
 }
 
 var updateUser = function(res, req) {
-  console.log("attempting to add new exercise");
+  // Handle invalid user data
   if (!req.body.userId||!req.body.description||!req.body.duration) {
     res.json("Please enter a valid user id, description and duration");
   }
   let now = Date();
   // 'upsert:false' - if id not found do not add the exercise details to the log
   // 'multi:false'  - if multiple matching ids found, update one only
+  
+  // Add user's exercise to the database and return their input through the response object
   users.findByIdAndUpdate({_id:req.body.userId}, 
     {$push:{"exerciseLog": {description: req.body.description, duration: req.body.duration, date: req.body.date||now}}},
     {upsert:false, multi:false},
@@ -168,7 +168,7 @@ var updateUser = function(res, req) {
 var getUserAndExercise = function(req, res, mostRecentLog) {
   let user = users.findById({_id:req.body.userId}, {userName:1}, function(error, user) {
       if (error) {
-        console.log(error);
+        res.send(error);
       } else {
         let userAndExercise =  { user, mostRecentLog };
         res.json(userAndExercise);
