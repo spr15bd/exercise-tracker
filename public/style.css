@@ -1,6 +1,11 @@
 p {
-    font-size: 16px;
-    font-family: monospace;
+  font-size: 16px;
+  font-family: monospace;
+  margin-left: 15px;
+}
+
+h1, h3 {
+  color: green;
 }
 
 input {
