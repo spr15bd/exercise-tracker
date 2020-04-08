@@ -1,0 +1,22 @@
+p {
+  font-size: 16px;
+  font-family: monospace;
+  margin-left: 15px;
+}
+
+h1, h3 {
+  color: red
+}
+
+input {
+  background-color:lightgray;
+}
+
+#new-user, #add-exercises {
+  padding:5px;
+  margin: 10px;
+  border-color: red;
+  border-width: 2px;
+  border-style: solid;
+  background-color: #FAEBD7;
+}
